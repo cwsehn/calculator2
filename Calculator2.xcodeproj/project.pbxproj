@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1378B1AC1F27B93C00D6F052 /* backupBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1378B1AB1F27B93C00D6F052 /* backupBrain.swift */; };
 		13A9F2F21F2525AC00F3FAA0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A9F2F11F2525AC00F3FAA0 /* AppDelegate.swift */; };
 		13A9F2F41F2525AC00F3FAA0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A9F2F31F2525AC00F3FAA0 /* ViewController.swift */; };
 		13A9F2F71F2525AC00F3FAA0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 13A9F2F51F2525AC00F3FAA0 /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1378B1AB1F27B93C00D6F052 /* backupBrain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = backupBrain.swift; path = calculator2/backupBrain.swift; sourceTree = SOURCE_ROOT; };
 		13A9F2EE1F2525AC00F3FAA0 /* Calculator2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Calculator2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13A9F2F11F2525AC00F3FAA0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		13A9F2F31F2525AC00F3FAA0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 				13A9F2FA1F2525AC00F3FAA0 /* LaunchScreen.storyboard */,
 				13A9F2FD1F2525AC00F3FAA0 /* Info.plist */,
 				13A9F3031F253B0300F3FAA0 /* Calc2Brain.swift */,
+				1378B1AB1F27B93C00D6F052 /* backupBrain.swift */,
 			);
 			path = Calculator2;
 			sourceTree = "<group>";
@@ -142,6 +145,7 @@
 			files = (
 				13A9F3041F253B0300F3FAA0 /* Calc2Brain.swift in Sources */,
 				13A9F2F41F2525AC00F3FAA0 /* ViewController.swift in Sources */,
+				1378B1AC1F27B93C00D6F052 /* backupBrain.swift in Sources */,
 				13A9F2F21F2525AC00F3FAA0 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -306,6 +310,7 @@
 				13A9F3021F2525AC00F3FAA0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
