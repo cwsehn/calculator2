@@ -60,11 +60,11 @@
 			children = (
 				13A9F2F11F2525AC00F3FAA0 /* AppDelegate.swift */,
 				13A9F2F31F2525AC00F3FAA0 /* ViewController.swift */,
+				13A9F3031F253B0300F3FAA0 /* Calc2Brain.swift */,
 				13A9F2F51F2525AC00F3FAA0 /* Main.storyboard */,
 				13A9F2F81F2525AC00F3FAA0 /* Assets.xcassets */,
 				13A9F2FA1F2525AC00F3FAA0 /* LaunchScreen.storyboard */,
 				13A9F2FD1F2525AC00F3FAA0 /* Info.plist */,
-				13A9F3031F253B0300F3FAA0 /* Calc2Brain.swift */,
 				1378B1AB1F27B93C00D6F052 /* backupBrain.swift */,
 			);
 			path = Calculator2;

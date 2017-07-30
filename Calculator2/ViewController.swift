@@ -9,11 +9,18 @@
 import UIKit
 
 class ViewController: UIViewController {
-
-
+    
+    
     @IBOutlet weak var display: UILabel!
-
-    var userIsTyping = false
+    
+    
+    @IBOutlet weak var descriptionDisplay: UILabel!
+    
+    
+    
+    private var userIsTyping = false
+    
+    private var clearEntry = false
     
     private var brain = Calc2Brain()
     
@@ -21,38 +28,76 @@ class ViewController: UIViewController {
     
     @IBAction func touchDigit(_ sender: UIButton) {
         
+        
         let digit = sender.currentTitle!
         
-        if digit == "." {
-            decimalCount += 1
+        if digit == "CE" {
+            clearEntry = true
         }
         
-        if (decimalCount < 2 || digit != ".") {
-            if userIsTyping {
-                let currentlyInDisplay = display.text!
-                display.text = currentlyInDisplay + digit
+        if !clearEntry {
+            
+            if digit == "." {
+                decimalCount += 1
+            }
+            
+            if (decimalCount < 2 || digit != ".") {
+                if userIsTyping {
+                    let currentlyInDisplay = display.text!
+                    display.text = currentlyInDisplay + digit
+                } else {
+                    display.text = digit
+                    userIsTyping = true
+                }
+            }
+        } else {
+            if !userIsTyping {
+                clearEntry = false
             } else {
-                display.text = digit
-                userIsTyping = true
+                if let currentDisplay = display.text {
+                    var displayChars = currentDisplay.characters
+                    if displayChars.count > 1 {
+                        let removed = displayChars.removeLast()
+                        if removed == "." {
+                            decimalCount -= 1
+                        }
+                        display.text = String(displayChars)
+                        clearEntry = false
+                    }
+                    else if displayChars.count == 1 {
+                        display.text = "0"
+                        userIsTyping = false
+                        clearEntry = false
+                        decimalCount = 0
+                    }
+                }
             }
         }
-        
     }
     
     
-    var displayValue: Double {
+    private var displayValue: Double {
         get {
             return Double(display.text!)!
         }
         set {
-            if newValue.isInfinite {
-                display.text = "Error"
+            display.text = formatDisplay(input: newValue)
+        }
+    }
+    
+    private var descriptionDisplayValue: String {
+        get {
+            return descriptionDisplay.text!
+        }
+        set {
+            
+            if brain.resultIsPending {
+                descriptionDisplay.text = "\(newValue)..."
             }
-            if newValue == 0.0 {
-                display.text = "0"
-            } else {
-                display.text = String(newValue)
+            else {
+                descriptionDisplay.text = "\(newValue)="
             }
+            
         }
     }
     
@@ -67,9 +112,48 @@ class ViewController: UIViewController {
             brain.performOperation(mathematicalSymbol)
         }
         if let result = brain.result {
-            displayValue = result
+            if result.0 != nil {
+                displayValue = result.0!
+            }
+            
+            descriptionDisplayValue = result.1
         }
     }
+    
+    
+    private func formatDisplay (input: Double) -> String {
+        let formatter = NumberFormatter()
+        
+        formatter.usesSignificantDigits = true
+        formatter.minimumSignificantDigits = 1
+        formatter.maximumSignificantDigits = 14
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 6
+        formatter.positiveInfinitySymbol = "Undefined"
+        let result = formatter.string(from: input as NSNumber)
+        
+        return result!
+    }
+    
+    
 }
 
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
