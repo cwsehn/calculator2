@@ -30,6 +30,7 @@ struct Calc2Brain {
     }
     
     
+    /* Do Not Alter public funcs from Assignment 1! */
     mutating func setOperand (_ operand: Double) {
         
         if operatorSetOnAccumulator {
@@ -44,7 +45,7 @@ struct Calc2Brain {
         }
     }
     
-    
+    /* Do Not Alter public funcs from Assignment 1! */
     mutating func performOperation (_ symbol: String) {
         
         if let operation = operations[symbol] {
@@ -144,7 +145,7 @@ struct Calc2Brain {
         }
     }
     
-    
+    /* Do Not Alter public vars from Assignment 1! */
     var result: (Double?, String)? {
         get {
             if description == "" {
@@ -199,19 +200,177 @@ struct Calc2Brain {
      let informalGreeting = "Hi \(nickName ?? fullName)"
      
      */
-    /*______________________________
-     Assignment 2 methods Below
-     -------------------------------*/
+    
+    /*________________________________________
+     Assignment 2 properties and methods Below
+     -----------------------------------------*/
     
     
-    func setOperand (variable named: String) {
-        // allow for variable input ...
+    private var opList: Array<String> = []
+    
+    mutating func undo () {        
+        if !opList.isEmpty {
+            opList.removeLast()
+        }
     }
+    
+    mutating func setOperand (variable named: String) {
+        if named == "C" {
+            opList.removeAll()
+        } else {
+            opList.append(named)
+        }
+    }
+    
     
     func evaluate (using variables: Dictionary<String,Double>? = nil)
         -> (result: Double?, isPending: Bool, description: String) {
             
-            return (accumulator, resultIsPending, description)
+            // these variables are ultimately returned by the evaluate tuple....
+            var output: Double?
+            var isPending: Bool = false
+            var descriptor = ""
+            
+            // the following optional variables are mutated within the scope of the func evaluate(using:)
+            var currentOperation: Operation?
+            var operand1: Double?
+            var operand2: Double?
+            var workingOp: String?
+            var currentOp: String?
+            var pendingOperation: Operation?
+        
+            /*___________________________________________________________________________________
+                nested methods .... func operationsSwitcher(op:op1:op2:) is called
+                    by the other nested method .... func evaluation(ops:)
+             -------------------------------------------------------------*/
+            func operationsSwitcher (op: Operation, op1: Double?, op2: Double?) -> Double? {
+                
+                switch op {
+                case .constant(let value):
+                    return value
+                    
+                case .unaryOperation(let function):
+                    if isPending && op2 != nil {
+                        descriptor = "\(workingOp!) (\(op2!))"
+                        return function(op2!)
+                    }
+                    if op1 != nil {
+                        descriptor = "\(currentOp!) (\(op1!))"
+                        return function(op1!)
+                    } else {
+                        descriptor = descriptor + "(\(0))"
+                        return function(0)
+                    }
+                case .binaryOperation(let function):
+                    isPending = false
+                    if op2 == nil {
+                        isPending = true
+                        return nil
+                    } else {
+                        isPending = false
+                        return function(op1!, op2!)
+                    }
+                case .equals:
+                    if isPending {
+                        output = operationsSwitcher(op: pendingOperation!, op1: operand1, op2: operand2)
+                        
+                        return output
+                        
+                    } else {
+                        output = operationsSwitcher(op: currentOperation!, op1: operand1, op2: operand2)
+                        
+                        return output
+                        
+                    }
+                case .clear:
+                    descriptor = ""
+                    operand1 = nil
+                    operand2 = nil
+                    return nil
+                    
+                default:
+                    descriptor = ""
+                    operand1 = nil
+                    operand2 = nil
+                    break
+                    
+                }
+                return nil
+            }
+
+            // nested method.... func evaluation(ops:) is called with external "opList" array by conditional below.....
+            func evaluation (ops: [String]) -> Double? {
+                
+                var workingOps = ops
+                
+                while workingOps.count != 0 {
+                    
+                    workingOp = workingOps[0]
+                    
+                    if isPending {
+                        pendingOperation = currentOperation ?? operations["C"]
+                    }
+                    
+                    if let operation = operations[workingOp!] {
+                        
+                        if workingOp != "="  {
+                            currentOperation = operation
+                            currentOp = workingOp
+                        } else {
+                            currentOperation = currentOperation ?? operations["C"]
+                        }
+                        
+                        if isPending && workingOp != "=" {
+                            descriptor = descriptor + " \(workingOp!)"
+                            output = operationsSwitcher(op: operation, op1: operand1, op2: operand2)
+                            if output != nil {
+                                operand1 = output
+                            }
+                            
+                        }
+                        else {
+                            descriptor = descriptor + " \(workingOp!)"
+                            output = operationsSwitcher(op: operation, op1: operand1, op2: operand2)
+                            
+                            if output != nil {
+                                operand1 = output
+                                operand2 = nil
+                            }
+                        }
+                        workingOps.removeFirst()
+                    }
+                    
+                    if Double(workingOp!) != nil {
+                        if operand1 == nil || operand1 == 0 {
+                            output = nil
+                            operand1 = Double(workingOp!)
+                            descriptor = descriptor + " \(workingOp!)"
+                        } else {
+                            operand2 = Double(workingOp!)
+                            isPending = true
+                            descriptor = descriptor + " \(workingOp!)"
+                        }
+                        workingOps.removeFirst()
+                    }
+                }
+                
+                return output
+            }
+            
+            /*________________________________________________________________________________
+                this simple conditional statement accesses opList array of input from user...
+                    and calls the nested func evaluation(ops:)
+                -------------------------------------------------*/
+            if opList.isEmpty {
+                output = nil
+                isPending = false
+                descriptor = ""
+            } else {
+                output = evaluation(ops: opList)
+            }
+            
+            
+            return (output, isPending, descriptor)
     }
     
     
@@ -221,10 +380,6 @@ struct Calc2Brain {
     
     
 }
-
-
-
-
 
 
 

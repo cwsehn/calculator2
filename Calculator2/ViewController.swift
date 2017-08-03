@@ -24,6 +24,10 @@ class ViewController: UIViewController {
     
     private var brain = Calc2Brain()
     
+    private var evaluation: (result: Double?, isPending: Bool, description: String) = (nil, false, "")
+    
+    private var descriptionText = ""
+    
     private var decimalCount = 0
     
     @IBAction func touchDigit(_ sender: UIButton) {
@@ -85,29 +89,66 @@ class ViewController: UIViewController {
         }
     }
     
+    
     private var descriptionDisplayValue: String {
         get {
             return descriptionDisplay.text!
         }
         set {
-            
-            if brain.resultIsPending {
-                descriptionDisplay.text = "\(newValue)..."
+            if evaluation.description == "" {
+                descriptionText = ""
+                descriptionDisplay.text = "description"
+            } else {
+                if evaluation.isPending {
+                    descriptionText = "\(descriptionText) \(newValue)"
+                    descriptionDisplay.text = "\(descriptionText)..."
+                }
+                else {
+                    descriptionDisplay.text = "\(newValue)"
+                }
             }
-            else {
-                descriptionDisplay.text = "\(newValue)="
-            }
-            
         }
     }
     
     
     @IBAction func performOperation(_ sender: UIButton) {
         if userIsTyping {
-            brain.setOperand(displayValue)
+            
             userIsTyping = false
             decimalCount = 0
+            brain.setOperand(variable: display.text!)
+            evaluation = brain.evaluate()
+            descriptionDisplayValue = evaluation.description
+            brain.setOperand(variable: sender.currentTitle!)
+            evaluation = brain.evaluate()
+            descriptionDisplayValue = evaluation.description
+        } else {
+            
+            brain.setOperand(variable: sender.currentTitle!)
+            evaluation = brain.evaluate()
+            descriptionDisplayValue = evaluation.description
         }
+        if evaluation.result != nil {
+            displayValue = evaluation.result!
+        } else {
+            displayValue = 0
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        /*
+         // Deprecated Code from Assignment 1
+         
         if let mathematicalSymbol = sender.currentTitle {
             brain.performOperation(mathematicalSymbol)
         }
@@ -118,6 +159,7 @@ class ViewController: UIViewController {
             
             descriptionDisplayValue = result.1
         }
+        */
     }
     
     
@@ -136,7 +178,26 @@ class ViewController: UIViewController {
     }
     
     
+    
+    @IBAction func VariableInput(_ sender: UIButton) {
+        
+        if sender.currentTitle == "M" {
+            brain.setOperand(variable: sender.currentTitle!)
+        }
+    
+        let evaluation = brain.evaluate(using: ["M": displayValue])
+        if evaluation.result != nil {
+            displayValue = evaluation.result!
+            }
+        descriptionDisplayValue = evaluation.description
+    }
+    
+    
+    
 }
+
+
+
 
 
 
