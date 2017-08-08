@@ -8,6 +8,11 @@
 
 import Foundation
 
+struct Memory {
+    var storedDictionary: Dictionary<String, Double> = [:]
+}
+
+
 
 struct Calc2Brain {
     
@@ -191,16 +196,6 @@ struct Calc2Brain {
     }
     
     
-    
-    
-    /*
-     // using default ?? values with optionals...
-     let nickName: String? = "Johnny"
-     let fullName: String = "John Appleseed"
-     let informalGreeting = "Hi \(nickName ?? fullName)"
-     
-     */
-    
     /*________________________________________
      Assignment 2 properties and methods Below
      -----------------------------------------*/
@@ -214,82 +209,169 @@ struct Calc2Brain {
         }
     }
     
+    
     mutating func setOperand (variable named: String) {
+       
         if named == "C" {
             opList.removeAll()
+            
         } else {
             opList.append(named)
         }
     }
     
-    
+    /*________________________________________________________________________________________
+        func evaluate(using:) represents the core implementation of this version of Calculator2
+            it utilizes both Operation Enum and operations Dictionary from original implementation...
+            and combines those data structures with some internal functions of it's own allowing it 
+            to be a non-mutating function in the scope of the overall Calc2Brain Struct....
+     ------------------------------------------------------------------------------------------*/
     func evaluate (using variables: Dictionary<String,Double>? = nil)
         -> (result: Double?, isPending: Bool, description: String) {
             
-            // these variables are ultimately returned by the evaluate tuple....
+        
+            // these variables are ultimately returned by the evaluate (result:isPending:description:) tuple....
             var output: Double?
             var isPending: Bool = false
-            var descriptor = ""
+            var descriptor = " "
             
-            // the following optional variables are mutated within the scope of the func evaluate(using:)
+            // the following variables are mutated within the scope of the func evaluate(using:)
+         
+            var workingOps = [String]()
+            var equalsIsSet: Bool = false
             var currentOperation: Operation?
             var operand1: Double?
             var operand2: Double?
+            var variableValue: Double = 0
             var workingOp: String?
             var currentOp: String?
+            var variableOperand: String?
             var pendingOperation: Operation?
-        
+            var binarys = ["+", "-", "÷", "×"]
+            var constantsOrRandom = ["π", "e", "?#"]
+            var isConstantOrRandom = false
+            var isBinary = false
+            var opSetOnValue = false
+            var isVariable = false
+
+            
             /*___________________________________________________________________________________
-                nested methods .... func operationsSwitcher(op:op1:op2:) is called
-                    by the other nested method .... func evaluation(ops:)
+             nested methods .... func operationsSwitcher(op:op1:op2:) is called
+             by the other nested method .... func evaluation(ops:)
              -------------------------------------------------------------*/
             func operationsSwitcher (op: Operation, op1: Double?, op2: Double?) -> Double? {
                 
                 switch op {
                 case .constant(let value):
+                    if operand1 == nil {
+                        operand1 = value
+                        opSetOnValue = true
+                        descriptor = descriptor + "\(workingOp!)"
+                    }
+                    else if operand2 == nil {
+                        operand2 = value
+                        opSetOnValue = true
+                        descriptor = descriptor + " \(workingOp!)"
+                    }
+                    
+                    equalsIsSet = true
                     return value
                     
+                    
                 case .unaryOperation(let function):
-                    if isPending && op2 != nil {
-                        descriptor = "\(workingOp!) (\(op2!))"
+                    
+                    equalsIsSet = false
+                    if op2 != nil {
+                        if isVariable {
+                            descriptor = descriptor + " \(workingOp!)(\(variableOperand!))"
+                            isVariable = false
+                        } else {
+                            descriptor = descriptor + " \(workingOp!)(\(op2!))"
+                        }
+                        opSetOnValue = true
+                        equalsIsSet = true
                         return function(op2!)
                     }
                     if op1 != nil {
-                        descriptor = "\(currentOp!) (\(op1!))"
+                        descriptor = "\(workingOp!)(\(descriptor))"
+                        opSetOnValue = true
+                        equalsIsSet = true
                         return function(op1!)
                     } else {
-                        descriptor = descriptor + "(\(0))"
+                        descriptor = "\(workingOp!)(0)"
+                        equalsIsSet = true
                         return function(0)
                     }
                 case .binaryOperation(let function):
-                    isPending = false
-                    if op2 == nil {
-                        isPending = true
-                        return nil
-                    } else {
+                    if workingOp == "=" || isConstantOrRandom {
+                        workingOp = " "
+                    }
+                    
+                    if equalsIsSet && output != nil {
+                        equalsIsSet = false
+                    }
+                    if op1 == nil {
                         isPending = false
+                        isBinary = false
+                        return nil
+                    }
+                    else if op2 == nil {
+                        descriptor = descriptor + " \(workingOp!)"
+                        isPending = true
+                        opSetOnValue = false
+                        isVariable = false
+                        return nil
+                    }
+                    else {
+                        if opSetOnValue == true {
+                            if workingOp == "=" {
+                                workingOp = " "
+                            }
+                            descriptor = "(\(descriptor) )\(workingOp!)"
+                            opSetOnValue = false
+                        }
+                        else if opSetOnValue == false {
+                            if isVariable {
+                                descriptor = "(\(descriptor) \(variableOperand!) )\(workingOp!)"
+                                isVariable = false
+                            }
+                            else {
+                                descriptor = "(\(descriptor) \(op2!) )\(workingOp!)"
+                            }
+                        }
                         return function(op1!, op2!)
+                        
                     }
                 case .equals:
+                    
                     if isPending {
                         output = operationsSwitcher(op: pendingOperation!, op1: operand1, op2: operand2)
+                        isPending = false
                         
                         return output
                         
                     } else {
-                        output = operationsSwitcher(op: currentOperation!, op1: operand1, op2: operand2)
-                        
+                        if operand2 == nil {
+                            output = operand1
+                            isPending = false
+                        } else {
+                            output = operationsSwitcher(op: currentOperation!, op1: operand1, op2: operand2)
+                            isPending = false
+                            
+                        }
                         return output
                         
                     }
                 case .clear:
-                    descriptor = ""
+                    descriptor = "description... "
+                    workingOps.removeAll()
+                    isPending = false
                     operand1 = nil
                     operand2 = nil
                     return nil
                     
                 default:
-                    descriptor = ""
+                    descriptor = " "
                     operand1 = nil
                     operand2 = nil
                     break
@@ -297,41 +379,71 @@ struct Calc2Brain {
                 }
                 return nil
             }
-
+            
             // nested method.... func evaluation(ops:) is called with external "opList" array by conditional below.....
             func evaluation (ops: [String]) -> Double? {
                 
-                var workingOps = ops
+                workingOps = ops
                 
-                while workingOps.count != 0 {
+                
+                while workingOps.count > 0 {
                     
                     workingOp = workingOps[0]
                     
-                    if isPending {
+                    if isPending && isBinary {
+                        
                         pendingOperation = currentOperation ?? operations["C"]
                     }
                     
                     if let operation = operations[workingOp!] {
                         
                         if workingOp != "="  {
-                            currentOperation = operation
-                            currentOp = workingOp
+                            
+                            if binarys.contains(workingOp!) {
+                                isBinary = true
+                                equalsIsSet = false
+                                currentOperation = operation
+                            } else {
+                                isBinary = false
+                            }
+                            if constantsOrRandom.contains(workingOp!) {
+                                isConstantOrRandom = true
+                            } else {
+                                isConstantOrRandom = false
+                            }
+                            
                         } else {
-                            currentOperation = currentOperation ?? operations["C"]
+                            equalsIsSet = true
+                            isBinary = false
+                        }
+                        if isConstantOrRandom {
+                            if equalsIsSet {
+                                operand1 = nil
+                                operand2 = nil
+                                isPending = false
+                                descriptor = " "
+                                equalsIsSet = false
+                            }
+                            output = operationsSwitcher(op: operation, op1: operand1, op2: operand2)
+                            isConstantOrRandom = false
+                            workingOps.removeFirst()
+                            continue
                         }
                         
                         if isPending && workingOp != "=" {
-                            descriptor = descriptor + " \(workingOp!)"
-                            output = operationsSwitcher(op: operation, op1: operand1, op2: operand2)
-                            if output != nil {
+                            if isBinary {
+                                output = operationsSwitcher(op: pendingOperation!, op1: operand1, op2: operand2)
                                 operand1 = output
+                                operand2 = nil
+                                isPending = true
+                            } else {
+                                output = operationsSwitcher(op: operation, op1: operand1, op2: operand2)
+                                operand2 = output
                             }
                             
                         }
                         else {
-                            descriptor = descriptor + " \(workingOp!)"
                             output = operationsSwitcher(op: operation, op1: operand1, op2: operand2)
-                            
                             if output != nil {
                                 operand1 = output
                                 operand2 = nil
@@ -339,32 +451,68 @@ struct Calc2Brain {
                         }
                         workingOps.removeFirst()
                     }
-                    
-                    if Double(workingOp!) != nil {
-                        if operand1 == nil || operand1 == 0 {
+                        
+                    else if Double(workingOp!) != nil {
+                        if equalsIsSet {
+                            operand1 = nil
+                            operand2 = nil
+                            equalsIsSet = false
+                        }
+                        if operand1 == nil {
                             output = nil
                             operand1 = Double(workingOp!)
-                            descriptor = descriptor + " \(workingOp!)"
+                            descriptor = "\(workingOp!)"
+                            equalsIsSet = true
+                            
                         } else {
                             operand2 = Double(workingOp!)
-                            isPending = true
-                            descriptor = descriptor + " \(workingOp!)"
+                            equalsIsSet = true
+                            
                         }
                         workingOps.removeFirst()
                     }
+                    else {
+                        isVariable = true
+                        variableOperand = workingOp!
+                        if equalsIsSet {
+                            operand1 = nil
+                            operand2 = nil
+                            isPending = false
+                            equalsIsSet = false
+                        }
+                        
+                        if let varValue = variables?[variableOperand!] {
+                            variableValue = varValue
+                        }
+                        
+                        if operand1 == nil {
+                            output = nil
+                            operand1 = variableValue
+                            descriptor = "\(workingOp!)"
+                            
+                            equalsIsSet = true
+                            
+                        } else {
+                            operand2 = variableValue
+                            equalsIsSet = true
+                        }
+                        
+                        workingOps.removeFirst()
+                    }
                 }
-                
+            
                 return output
             }
             
+            
             /*________________________________________________________________________________
-                this simple conditional statement accesses opList array of input from user...
-                    and calls the nested func evaluation(ops:)
-                -------------------------------------------------*/
+             this simple conditional statement accesses opList array of input from user...
+             and calls the nested func evaluation(ops:)
+             -------------------------------------------------*/
             if opList.isEmpty {
                 output = nil
                 isPending = false
-                descriptor = ""
+                descriptor = "description= "
             } else {
                 output = evaluation(ops: opList)
             }
@@ -375,11 +523,15 @@ struct Calc2Brain {
     
     
     
-    
-    
-    
-    
 }
+
+
+
+
+
+
+
+
 
 
 
