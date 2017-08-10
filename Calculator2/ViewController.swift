@@ -15,10 +15,13 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var descriptionDisplay: UILabel!
     
+   
+    @IBOutlet weak var memoryValueDisplay: UILabel!
+    
+    
+    
     private var brain = Calc2Brain()
     private var memoryStore = Memory()
-    
-    
     
     private var userIsTyping = false
     private var clearEntry = false
@@ -105,6 +108,18 @@ class ViewController: UIViewController {
             descriptionDisplay.text = evaluation.description
         }
     }
+    
+    private var memoryDisplayValue: Double {
+        get{
+            if memoryValueDisplay != nil {
+                return Double(memoryValueDisplay.text!)!
+            } else { return 0 }
+            
+        }
+        set {
+            memoryValueDisplay.text = formatDisplay(input: newValue)
+        }
+    }
 
     
     
@@ -115,6 +130,8 @@ class ViewController: UIViewController {
         evaluation = brain.evaluate()
         descriptionDisplayValue = evaluation.description
         displayValue = 0
+        memoryDisplayValue = 0
+        userIsTyping = false
         
     }
     
@@ -183,12 +200,20 @@ class ViewController: UIViewController {
         evaluation = brain.evaluate(using: memoryStore.storedDictionary)
         descriptionDisplayValue = evaluation.description
         
+        if variableAssignment != nil {
+            memoryDisplayValue = variableAssignment!
+        }
+        
+        
+        
         if evaluation.result != nil {
             displayValue = evaluation.result!
         }
+        
         else {
             displayValue = 0
         }
+ 
  
     }
     
@@ -201,9 +226,11 @@ class ViewController: UIViewController {
         if evaluation.result != nil {
             displayValue = evaluation.result!
         }
+        
         else {
             displayValue = 0
         }
+        
         
     }
     
